@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+
+  angular:
+    build:
+      context: .
+    #network_mode: "host"
+    container_name: my-web-container
+    image: ng/node-angular-cli:1.0
+    entrypoint: /bin/sh
+    stdin_open: true
+    tty: true
+    user: ${CURRENT_UID}
+    environment:
+       -  UID=1000
+       -  GID=1000
+    volumes: 
+      - ../app:/app
+    ports:
+      - 4200:4200
+      
+      
+        
