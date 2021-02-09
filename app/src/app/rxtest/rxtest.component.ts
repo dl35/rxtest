@@ -27,8 +27,8 @@ export class RxtestComponent implements OnInit {
  
     this.datas$ =   this.serv.getDatas();
 
-    //startWith ajoute de '' dans le flux
-    //debounceTime Émet une valeur après un lpas de temps
+    // startWith ajoute de '' dans le flux
+    // debounceTime Émet une valeur après un laps de temps
     // distinctUntilChanged() , renvoi un observablesi avec des valeurs distinctes
     this.search$ = this.search.valueChanges.pipe( startWith(''),
                                                  debounceTime(500),
