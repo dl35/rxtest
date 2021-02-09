@@ -1,0 +1,21 @@
+<div>
+<pre>
+service list of datas 
+filtre de recheche  avec combineLatest 
+pipe async
+</pre>
+</div>
+<mat-form-field class="example-form-field">
+    <mat-label>rechercher...</mat-label>
+    <input matInput type="text" [formControl]="search">
+  </mat-form-field>
+<div *ngFor="let item of filtered$ | async " >
+    <pre>
+        {{ item.id }}
+        {{ item.userId }}
+        {{ item.title  }}
+        {{ item.body  }}
+    </pre>
+</div>
+
+
