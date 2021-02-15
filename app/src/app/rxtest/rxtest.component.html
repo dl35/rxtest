@@ -9,6 +9,10 @@ pipe async
     <mat-label>rechercher...</mat-label>
     <input matInput type="text" [formControl]="search">
   </mat-form-field>
+  &nbsp;&nbsp;
+<mat-button-toggle  (click)="update()">Go</mat-button-toggle>  
+&nbsp;&nbsp;
+<mat-button-toggle  (click)="update2()">Go2</mat-button-toggle>  
 <div *ngFor="let item of filtered$ | async " >
     <pre>
         {{ item.id }}
