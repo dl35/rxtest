@@ -3,6 +3,9 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const config = require('./config');
 const mysql = require('mysql');
+
+
+
 const mydatas= require('./routes/mydatas');
 const init= require('./routes/init');
 
@@ -29,6 +32,18 @@ app.use('/init' , init);
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
+
+
+
+
+app.use(function(err, req, res, next) {
+  //console.error(err.stack);
+  var status = (err.status ) ? err.status : 500 ;
+  res.status( status ).send( err.message );
+});
+
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)

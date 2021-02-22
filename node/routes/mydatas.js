@@ -33,7 +33,12 @@ router.get('/page/:page', function(req, res, next) {
   var PAGE = req.params.page;
 
   if( ! PAGE.match("^[0-9]+$") )   {
-    return next ("page  must be an integer !!! ");
+    var e = new Error("page  must be an integer !!");
+    e.status = 400 ;
+    // HttpStatus.NOT_FOUND ;
+   // return next (e);
+    throw ( e );
+
   }
  
  
@@ -97,6 +102,7 @@ router.get('/page/:page', function(req, res, next) {
        conn.release();
      }
      return next( error );
+     
     });
 
 
