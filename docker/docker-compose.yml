@@ -4,9 +4,8 @@ services:
 
   angular:
     build:
-      context: .
-    #network_mode: "host"
-    container_name: my-web-container
+      context: angular/.
+    container_name: ng-angular
     image: ng/node-angular-cli:1.0
     entrypoint: /bin/sh
     stdin_open: true
@@ -21,4 +20,29 @@ services:
       - 4200:4200
       
       
-        
+  node:
+    build:
+      context: express/.
+    container_name: ng-node
+    image: ng/node:1.0
+    depends_on:
+      - mysql
+    entrypoint: /bin/sh
+    user: ${CURRENT_UID}
+    volumes:
+      - ../node:/app  
+    ports:
+      - 3000:3000  
+      
+
+  mysql:
+      image: mysql:5.6.40
+      container_name: ng-mysql
+      environment:
+           MYSQL_DATABASE: prod
+           MYSQL_USER: prod
+           MYSQL_PASSWORD: prod
+           MYSQL_ROOT_PASSWORD: prod
+      volumes:
+        - ../database:/var/lib/mysql
+      restart: always

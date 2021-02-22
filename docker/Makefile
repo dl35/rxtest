@@ -28,6 +28,10 @@ clean:
 dev: 
 	CURRENT_UID=1000:1000 docker-compose run --rm  --service-ports angular
 
-up: 
+ng: 
 	CURRENT_UID=1000:1000 docker-compose run --rm  --service-ports angular --entrypoint ./serve.sh
 	#docker exec -it  -e UID=`id -u` -e GID=`id -g`  angular sh
+
+
+node:
+	CURRENT_UID=1000:1000 docker-compose run --rm  --service-ports node
