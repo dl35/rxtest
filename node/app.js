@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 const config = require('./config');
 const mysql = require('mysql');
 const mydatas= require('./routes/mydatas');
@@ -19,6 +20,9 @@ module.exports.pool = pool;
 const app = express()
 
 app.use(morgan('dev'))
+app.use(bodyParser.json());
+
+
 app.use('/datas' , mydatas);
 app.use('/init' , init);
 

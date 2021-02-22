@@ -28,34 +28,70 @@ router.get('/about', function(req, res) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // define the about route
-router.get('/page/:page', function(req, res) {
+router.get('/page/:page', function(req, res, next) {
 
-   var WHERE = "" ;
-   var OFFSET = 0 ;
-   var LIMIT = 100 ;
-   var START = 0 ; 
+  var PAGE = req.params.page;
 
-      if( page <= 0 ) {
-        OFFSET = 0 ;
-      } else { 
-        OFFSET = PAGE * LIMT ;
-      }
+  if( ! PAGE.match("^[0-9]+$") )   {
+    return next ("page  must be an integer !!! ");
+  }
+ 
+ 
+  var WHERE ="";
+  if( req.body && req.body.search ) {
+    var bs= req.body.search ;
+    var w = "";
+    if(bs.firstname ) {
+      w += " firstname LIKE '%"+bs.firstname+"%' " ;
+    }
+    if(bs.lastname ) {
+      if ( w.length != 0  ){
+      w += " AND ";}
+      w += " lastname LIKE '%"+bs.lastname+"%' " ;
+    }
+    if(bs.sexe ) {
+      if ( w.length != 0  ){
+      w += " AND ";}
+      w += " sexe = '"+bs.sexe+"' " ; 
+    }
+
+    if ( w.length != 0  ) {
+      WHERE = " WHERE "+ w;
+    }
+    
+  }
+  
+
+  var LIMIT = 100 ;
+  var pages = 1 ;
 
 
 
   var conn = undefined ;
-  var query = "SELECT * FROM prod.sports "+WHERE+" LIMIT "+ LIMIT +" OFFSET "+OFFSET  ;
+  var query = "SELECT COUNT (*) as nb  FROM prod.sports "+WHERE ;
   dbtool.connect(server.pool).then(con => {
      conn = con;
      return dbtool.doQuery(conn, query, [] );
    })
-
-  // SELECT column FROM table LIMIT {someLimit} OFFSET {someOffset};
-
     .then(result =>  { 
-
+      var nb = result[0].nb ;
+      if( nb > LIMIT ) {
+        pages  = Math.ceil( nb / LIMIT  )  ;
+      }
+ 
+      if (PAGE > pages  ) {
+        PAGE  = pages ;
+      }   
+   
+     OFFSET = ( PAGE-1 ) * LIMIT ;
+    
+     query = "SELECT * FROM prod.sports "+WHERE+" LIMIT "+ LIMIT +" OFFSET "+OFFSET  ;
+     return dbtool.doQuery(conn, query, [] );
+    })
+      .then( result => {
+     const d = { pages :pages , datas : result } ;
      conn.release();
-     return res.json( result);
+     return res.json( d );
    }).catch(error => {
      if (conn) {
        conn.release();
