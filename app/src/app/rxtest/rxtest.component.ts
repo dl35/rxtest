@@ -79,8 +79,8 @@ export class RxtestComponent implements OnInit {
   }
 
       update() {
-console.log( 'update') ;
-this.subject$.next( 'POST' );
+      console.log( 'update') ;
+      this.subject$.next( 'POST' );
 
 
       }
