@@ -1,0 +1,11 @@
+html
+  head
+    title= 'Bdd'
+  body
+    h1= 'Manage bdd'
+
+    ul
+        each val in method
+            li=  " ["+ [ val.route ]  +"] " 
+                a(href=val.route)= val.message
+                

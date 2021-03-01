@@ -6,8 +6,12 @@ const mysql = require('mysql');
 
 
 
-const mydatas= require('./routes/mydatas');
-const init= require('./routes/init');
+
+
+
+
+const myapi= require('./routes/myapi');
+const mybdd= require('./routes/mybdd');
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -22,12 +26,20 @@ module.exports.pool = pool;
 ////////////////////////////////////////////////////////////////////////////////////
 const app = express()
 
+app.set('views', __dirname + '/views');
+app.set('view engine', 'pug');
+
+
 app.use(morgan('dev'))
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.raw());
+app.use('/api' , myapi);
+app.use('/bdd' , mybdd);
 
 
-app.use('/datas' , mydatas);
-app.use('/init' , init);
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!')

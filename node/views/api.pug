@@ -1,0 +1,15 @@
+html
+  head
+    title= 'Api'
+    style
+     include style.css
+
+  body
+    h1= 'Manage api'
+
+
+    ul
+        each val in method
+            li 
+              span(class='sb')= val.methode 
+              span= " "+val.message + " --> " +val.route   

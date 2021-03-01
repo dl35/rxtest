@@ -12,6 +12,7 @@ exports.connect = (pool) => {
 exports.doQuery = (conn, query , filters ) => {
     return new Promise(function(resolve, reject){
      var q = conn.query( query , filters, function (err, result) {
+       console.log( q.sql )
         if( err ) {
             reject(err);
         } else {

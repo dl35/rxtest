@@ -12,16 +12,25 @@ console.log('****** process route is ', process.cwd()  ) ;
 var maxDatas = 1000 ;
 
 
+var infos =[
+  { route: '/bdd/create', message: 'Create table and add datas'},
+  { route: '/bdd/list', message: 'get all items'},
+  { route: '/bdd/delete', message: 'delete all items'},
+  { route: '/bdd/drop', message: 'remove table'},
+
+]
+
+
 router.get('/', (req, res) => {
-    res.send('init route....!')
+    res.render('bdd', { method : infos}  );
   })
 
 
 // creation de la table prod.sports
 router.get( '/create' , function(req, res , next) {
-        //id, name, surname , discipline , date , temps
+        //id, name, surname , discipline , date , duree
         var conn = undefined ;
-        var query = "CREATE TABLE IF NOT EXISTS prod.sports  (id INT AUTO_INCREMENT PRIMARY KEY, sexe ENUM('F','M'),  firstname VARCHAR(255), lastname VARCHAR(255),  discipline ENUM('RUNNING','BIKE','SWIM'), temps INT , day DATETIME) " ;
+        var query = "CREATE TABLE IF NOT EXISTS prod.sports  (id INT AUTO_INCREMENT PRIMARY KEY, sexe ENUM('F','M'),  firstname VARCHAR(255), lastname VARCHAR(255),  discipline ENUM('RUNNING','BIKE','SWIM'), duree INT , day DATETIME) " ;
         dbtool.connect(server.pool).then(con => {
            conn = con;
            return dbtool.doQuery(conn, query, [] );
@@ -30,7 +39,7 @@ router.get( '/create' , function(req, res , next) {
             query ="DELETE FROM prod.sports ";
             return dbtool.doQuery(conn, query, [] )})
           .then(result => {
-            query ="INSERT INTO prod.sports (sexe, firstname, lastname, discipline, temps , day ) VALUES ?";
+            query ="INSERT INTO prod.sports (sexe, firstname, lastname, discipline, duree , day ) VALUES ?";
             var p = addDatas( maxDatas );
             return dbtool.doQuery(conn, query, [p] )})
           .then(result => {
@@ -91,15 +100,15 @@ for (i = 0; i < maxDatas ; i++) {
 
         if ( discipline == 'RUNNING ') {
           pos= myrandom( runningA.length ) ;
-          var temps= runningA[pos] ;
+          var duree= runningA[pos] ;
         } else if ( discipline == 'BIKE ' ) {
           pos= myrandom( bikeA.length ) ;
-          var temps= bikeA[pos] ;
+          var duree= bikeA[pos] ;
         } else {
           pos= myrandom( swimA.length ) ;
-          var temps= swimA[pos] ;
+          var duree= swimA[pos] ;
         }
-        tmp[4]  = temps ;
+        tmp[4]  = duree ;
         var day = randomDate(new Date(2020, 0, 1), new Date())
         tmp[5] =  day ;
         datas.push( tmp ) ;
@@ -108,7 +117,7 @@ for (i = 0; i < maxDatas ; i++) {
 }
 
 
-// sexe , firstname, lastname, discipline, temps , date;
+// sexe , firstname, lastname, discipline, duree , date;
 return datas ;
 
 }  
@@ -127,7 +136,7 @@ function myrandom( size ) {
 /////////////////////////////////////////////////////////////
 
 router.get( '/drop' , function(req, res , next) {
-  //id, name, surname , discipline , date , temps
+  //id, name, surname , discipline , date , duree
   var conn = undefined ;
   var query = "DROP TABLE prod.sports " ;
   dbtool.connect(server.pool).then(con => {
@@ -146,7 +155,7 @@ router.get( '/drop' , function(req, res , next) {
 /////////////////////////////////////////////////////////////
 
 router.get( '/list' , function(req, res , next) {
-  //id, name, surname , discipline , date , temps
+  //id, name, surname , discipline , date , duree
   var conn = undefined ;
   var query = "SELECT * FROM  prod.sports " ;
   dbtool.connect(server.pool).then(con => {
@@ -164,7 +173,7 @@ router.get( '/list' , function(req, res , next) {
 })
 ///////////////////////////////////////////////////////////////////
 router.get( '/delete' , function(req, res , next) {
-  //id, name, surname , discipline , date , temps
+  //id, name, surname , discipline , date , duree
   var conn = undefined ;
   var query = "DELETE FROM prod.sports " ;
   dbtool.connect(server.pool).then(con => {

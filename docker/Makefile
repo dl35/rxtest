@@ -35,3 +35,4 @@ ng:
 
 node:
 	CURRENT_UID=1000:1000 docker-compose run --rm  --service-ports node
+	clean
