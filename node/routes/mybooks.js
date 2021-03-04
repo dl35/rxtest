@@ -9,13 +9,15 @@ const Joi = require('joi')
 
 
 const schema = Joi.object().keys({
-    //username: Joi.string().alphanum().min(3).max(30).required()
-    sexe :Joi.string().valid('F', 'M').required(),
-    firstname:Joi.string().required() ,
-    lastname:Joi.string().required()  ,
-    discipline: Joi.string().valid('SWIM', 'BIKE' ,'RUNNING').required(),
-    duree: Joi.number().integer().min(30).max(330).required(),
-    day: Joi.date().format("YYYY-MM-DD\THH:mm:00\Z").required()
+
+    title:Joi.string().required() ,
+    isbn:Joi.number().integer().required(),
+    pagecount: Joi.number().integer().min(1).required(),
+    url: Joi.string().required()  ,
+    description: Joi.string().min(10).required()  ,
+    status: Joi.string().required()  ,
+    authors: Joi.string().required()  ,
+    publish: Joi.date().format("YYYY-MM-DD\THH:mm:00\Z").required()
 })
 
 
@@ -31,11 +33,11 @@ router.use(function timeLog(req, res, next) {
 
 
 var infos =[
-  { route: '/api/pages/:page', methode: 'GET' ,  message: '[Pagination]'},
-  { route: '/api/:id', methode: 'GET' ,  message: '[Item]'},
-  { route: '/api/:id' ,methode: 'DELETE' ,  message: '[Item]'},
-  { route: '/api/:id',methode: 'PUT' ,  message: '[Modification]'},
-  { route: '/api/',methode: 'POST' ,  message: '[Ajout]'},
+  { route: '/books/list', methode: 'GET' ,  message: '[Items]'},  
+  { route: '/books/:id', methode: 'GET' ,  message: '[Item]'},
+  { route: '/books/:id' ,methode: 'DELETE' ,  message: '[Item]'},
+  { route: '/books/:id',methode: 'PUT' ,  message: '[Modification]'},
+  { route: '/books/',methode: 'POST' ,  message: '[Ajout]'},
 
 ];
 
@@ -44,8 +46,33 @@ var infos =[
 ///////////////////////////////////////////////////////////////////////////////////////////
 // define the home page route
 router.get('/', function(req, res) {
-  res.render('api', { method : infos}  );
+  res.render('books', { method : infos}  );
 });
+////////////////////////////////////////////////////////////////////////////////////////////
+//method get...
+router.get('/list', function(req, res, next) {  
+
+    var conn = undefined ;
+    var query = "SELECT * FROM prod.books" ;
+    var p = [] ;
+    
+    
+    dbtool.connect(server.pool).then(con => {
+        conn = con;
+        return dbtool.doQuery(conn, query, p );
+     }).then(result => {
+        conn.release();
+        conn = undefined ;
+        return res.json( result )	;
+    }).catch(error => {
+      if (conn) {
+        conn.release();
+      }
+        return next( error );
+      
+     });
+    
+    })
 ////////////////////////////////////////////////////////////////////////////////////////////
 //method get...
 router.get('/:id', function(req, res, next) {  
@@ -56,7 +83,7 @@ if( ! id.match("^[0-9]+$") )   {
   throw ( e );
 }
 var conn = undefined ;
-var query = "SELECT * FROM prod.sports WHERE id = ?" ;
+var query = "SELECT * FROM prod.books WHERE id = ?" ;
 var p = [id] ;
 
 
@@ -86,7 +113,7 @@ router.delete('/:id', function(req, res, next) {
     throw ( e );
   }
   var conn = undefined ;
-  var query = "DELETE FROM prod.sports WHERE id = ?" ;
+  var query = "DELETE FROM prod.books WHERE id = ?" ;
   var p = [id] ;
   
   
@@ -118,7 +145,7 @@ router.post( '/', function(req, res, next) {
   result = undefined ; 
 
   var conn = undefined ;
-  var query ="INSERT INTO prod.sports SET ?" ;
+  var query ="INSERT INTO prod.books SET ?" ;
   var p = [ datas ] ;
   
   
@@ -159,7 +186,7 @@ router.put( '/:id', function(req, res, next) {
 
 
   var conn = undefined ;
-  var query = "UPDATE prod.sports SET ? WHERE ? " ;
+  var query = "UPDATE prod.books SET ? WHERE ? " ;
   var p = [ datas , id ] ;
   
   
@@ -178,92 +205,6 @@ router.put( '/:id', function(req, res, next) {
    });
   
   })
-//////////////////////////////////////////////////////////////////////////////////////////////
-// define the about route
-router.get('/pages/:page', function(req, res, next) {
-
-  var PAGE = req.params.page;
-
-  if( ! PAGE.match("^[0-9]+$") )   {
-    var e = new Error("page  must be an integer !!");
-    e.status = 400 ;
-    // HttpStatus.NOT_FOUND ;
-   // return next (e);
-    throw ( e );
-
-  }
- 
- 
-  var WHERE ="";
-  if( req.body && req.body.search ) {
-    var bs= req.body.search ;
-    var w = "";
-    if(bs.firstname ) {
-      w += " firstname LIKE '%"+bs.firstname+"%' " ;
-    }
-    if(bs.lastname ) {
-      if ( w.length != 0  ){
-      w += " AND ";}
-      w += " lastname LIKE '%"+bs.lastname+"%' " ;
-    }
-    if(bs.sexe ) {
-      if ( w.length != 0  ){
-      w += " AND ";}
-      w += " sexe = '"+bs.sexe+"' " ; 
-    }
-
-    if ( w.length != 0  ) {
-      WHERE = " WHERE "+ w;
-    }
-    
-  }
-  
-
-  var LIMIT = 100 ;
-  var pages = 1 ;
-
-
-
-  var conn = undefined ;
-  var query = "SELECT COUNT (*) as nb  FROM prod.sports "+WHERE ;
-  dbtool.connect(server.pool).then(con => {
-     conn = con;
-     return dbtool.doQuery(conn, query, [] );
-   })
-    .then(result =>  { 
-      var nb = result[0].nb ;
-      if( nb > LIMIT ) {
-        pages  = Math.ceil( nb / LIMIT  )  ;
-      }
- 
-      if (PAGE > pages  ) {
-        PAGE  = pages ;
-      }   
-   
-     OFFSET = ( PAGE-1 ) * LIMIT ;
-    
-     query = "SELECT * FROM prod.sports "+WHERE+" LIMIT "+ LIMIT +" OFFSET "+OFFSET  ;
-     return dbtool.doQuery(conn, query, [] );
-    })
-      .then( result => {
-     const d = { pages :pages , datas : result } ;
-     conn.release();
-     return res.json( d );
-   }).catch(error => {
-     if (conn) {
-       conn.release();
-     }
-     return next( error );
-     
-    });
-
-
-
-
-});
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

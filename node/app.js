@@ -11,13 +11,14 @@ const mysql = require('mysql');
 
 
 const myapi= require('./routes/myapi');
+const mybooks= require('./routes/mybooks');
 const mybdd= require('./routes/mybdd');
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 const port = config.default_port;
 console.info('initializing (mode '+((config.development)?'development':'production')+')');
-console.log('path= ', __dirname  ) ;
+//console.log('path= ', __dirname  ) ;
 
 const pool  = mysql.createPool(config.mysql_config);
 module.exports.pool = pool;
@@ -35,6 +36,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use('/api' , myapi);
+app.use('/books' , mybooks);
 app.use('/bdd' , mybdd);
 
 
@@ -58,5 +60,5 @@ app.use(function(err, req, res, next) {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`listen at http://localhost:${port}`)
 })

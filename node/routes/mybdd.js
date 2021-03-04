@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+
+
 var express = require('express');
 var router = express.Router();
 
@@ -5,8 +9,8 @@ var  dbtool = require('./dbtool');
 //var config = require('../config');
 var server = require('../app');
 
-console.log('****** path route is ', __dirname  ) ;
-console.log('****** process route is ', process.cwd()  ) ;
+//console.log('****** path route is ', __dirname  ) ;
+//console.log('****** process route is ', process.cwd()  ) ;
 
 
 var maxDatas = 1000 ;
@@ -17,7 +21,10 @@ var infos =[
   { route: '/bdd/list', message: 'get all items'},
   { route: '/bdd/delete', message: 'delete all items'},
   { route: '/bdd/drop', message: 'remove table'},
-
+  { route: '/bdd/books/create', message: 'Create table and add datas'},
+  { route: '/bdd/books/list', message: 'get all items'},
+  { route: '/bdd/books/delete', message: 'delete all items'},
+  { route: '/bdd/books/drop', message: 'remove table'},
 ]
 
 
@@ -25,7 +32,7 @@ router.get('/', (req, res) => {
     res.render('bdd', { method : infos}  );
   })
 
-
+/////////////////////////////////////////////////////////////////////////////////////////
 // creation de la table prod.sports
 router.get( '/create' , function(req, res , next) {
         //id, name, surname , discipline , date , duree
@@ -56,7 +63,6 @@ router.get( '/create' , function(req, res , next) {
            return next( error );
           });
     })
-
 
 
 
@@ -189,8 +195,154 @@ router.get( '/delete' , function(req, res , next) {
      return next( error );
     });
 })
+///////////////////////////////////////////////////////////////////
+router.get( '/books/delete' , function(req, res , next) {
+  //id, name, surname , discipline , date , duree
+  var conn = undefined ;
+  var query = "DELETE FROM prod.books " ;
+  dbtool.connect(server.pool).then(con => {
+     conn = con;
+     return dbtool.doQuery(conn, query,[] );
+   }).then(result =>  { 
+     conn.release();
+     return res.json({ delete:  true  });
+   }).catch(error => {
+     if (conn) {
+       conn.release();
+     }
+     return next( error );
+    });
+})
 
+/////////////////////////////////////////////////////////////
 
+router.get( '/books/drop' , function(req, res , next) {
+  //id, name, surname , discipline , date , duree
+  var conn = undefined ;
+  var query = "DROP TABLE prod.books " ;
+  dbtool.connect(server.pool).then(con => {
+     conn = con;
+     return dbtool.doQuery(conn, query, [] );
+   }).then(result =>  { 
+     conn.release();
+     return res.json({ drop:  true  });
+   }).catch(error => {
+     if (conn) {
+       conn.release();
+     }
+     return next( error );
+    });
+})
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// creation de la table prod.sports
+router.get( '/books/create' , function(req, res , next) {
+  
+
+  var books = loadBooks();
+
+  var conn = undefined ;
+  var query = "CREATE TABLE IF NOT EXISTS prod.books  (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255), isbn INT, pagecount INT, url VARCHAR(255), description VARCHAR(255), status VARCHAR(15), authors VARCHAR(255), publish DATETIME )" ;
+  dbtool.connect(server.pool).then(con => {
+     conn = con;
+     return dbtool.doQuery(conn, query, [] );
+   })
+    .then(result => {
+      query ="DELETE FROM prod.books ";
+      return dbtool.doQuery(conn, query, [] )})
+    .then(result => {
+      query ="INSERT INTO prod.books (title, isbn, pagecount, publish, url, description, status, authors) VALUES ?";
+      return dbtool.doQuery(conn, query, [books] )})
+    .then(result => {
+     query ="SELECT count(*) as total FROM prod.books ";
+     return dbtool.doQuery(conn, query, [] )})
+    .then(result =>  { 
+     var nb = result[0].total ;
+     conn.release();
+     return res.json({ inserted:  nb  });
+   }).catch(error => {
+     if (conn) {
+       conn.release();
+     }
+     return next( error );
+    });
+})
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function loadBooks(){
+  var values = [];
+  var max = 100; 
+  fs.readFile(path.join(__dirname, '/datas/books.json') , (err, data) => {
+    if (err) throw err;
+    let books = JSON.parse(data);
+    
+    var i = 0 ;
+    books.forEach(obj => {
+      if( values.length ===  max ) {
+        return;
+      }
+      
+
+      const v = [] ;
+      Object.entries(obj).forEach(([key, value]) => {
+            if( key === 'authors' ) {
+               value= value.join();
+            }
+
+          if( key !== 'categories' &&  key !== 'longDescription'  ) {
+           v.push(value);
+          }
+      });
+     
+          if( v.length == 8 ) {
+            values.push( v ) ;
+                   }
+     
+    
+  });
+  
+  
+
+});
+
+//console.log( values );
+return values ;
+}
+/////////////////////////////////////////////////////////////
+
+router.get( '/books/list' , function(req, res , next) {
+  //id, name, surname , discipline , date , duree
+  var conn = undefined ;
+  var query = "SELECT * FROM  prod.books " ;
+  dbtool.connect(server.pool).then(con => {
+     conn = con;
+     return dbtool.doQuery(conn, query, [] );
+   }).then(result =>  { 
+     conn.release();
+     return res.json( result );
+   }).catch(error => {
+     if (conn) {
+       conn.release();
+     }
+     return next( error );
+    });
+})
+///////////////////////////////////////////////////////////////////
+router.delete( '/books/delete' , function(req, res , next) {
+  //id, name, surname , discipline , date , duree
+  var conn = undefined ;
+  var query = "DELETE FROM prod.books " ;
+  dbtool.connect(server.pool).then(con => {
+     conn = con;
+     return dbtool.doQuery(conn, query,[] );
+   }).then(result =>  { 
+     conn.release();
+     return res.json({ delete:  true  });
+   }).catch(error => {
+     if (conn) {
+       conn.release();
+     }
+     return next( error );
+    });
+})
 
 module.exports = router;
