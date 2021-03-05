@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, of, timer } from 'rxjs';
 import { startWith, debounceTime, distinctUntilChanged, map, filter, tap, switchMap } from 'rxjs/operators';
-import { MyDatas } from '../datas/mydatas';
-import { TestrestService } from '../services/testrest.service';
+import { MyBooks } from '../datas/mybooks';
+import { BooksService } from '../services/books.service';
 
 @Component({
   selector: 'app-rxtest',
@@ -19,20 +19,20 @@ export class RxtestComponent implements OnInit {
 
   
   subject$ = new BehaviorSubject<string>('GET');
-  datas$ : Observable<MyDatas[]>;
+  datas$ : Observable<MyBooks[]>;
   search$ : Observable<string>;
-  filtered$ : Observable<MyDatas[]>;
+  filtered$ : Observable<MyBooks[]>;
 
   search: FormControl = new FormControl('');
   // data jsonplaceholder
-  constructor(private serv: TestrestService ) { }
+  constructor(private serv: BooksService ) { }
 
   ngOnInit(): void {
  
    
 
 
-   this.datas$ = this.subject$.pipe( switchMap( m =>  this.serv.getDatas( m ) ) ) ;
+   this.datas$ = this.subject$.pipe( switchMap( m =>  this.serv.get() ) ) ;
 
 
     // startWith ajoute de '' dans le flux

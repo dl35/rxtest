@@ -1,12 +1,23 @@
 {
   "/api/*": {
    
-    "target": "https://jsonplaceholder.typicode.com/",
+    "target": "http://node:3000/",
     "secure": false,
     "logLevel": "debug",
     "changeOrigin": true,
     "pathRewrite": {
-      "^/api/": ""
+      "^/api/": "/api/"
+    }
+  } ,
+
+  "/books/*": {
+   
+    "target": "http://node:3000/",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/books/": "/books/"
     }
   }
 

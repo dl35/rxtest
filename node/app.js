@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+var cors = require('cors');
 const config = require('./config');
 const mysql = require('mysql');
 
@@ -30,8 +31,11 @@ const app = express()
 app.set('views', __dirname + '/views');
 app.set('view engine', 'pug');
 
+app.use(cors());
+app.options('*', cors());
 
-app.use(morgan('dev'))
+
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
